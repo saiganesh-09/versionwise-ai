@@ -28,7 +28,7 @@ something) from **effective time** (when a rule was actually in force).
 
 - [x] **Phase 0** — Repo inspection, architecture, this plan
 - [x] **Phase 1** — Monorepo foundation: Next.js + FastAPI, health checks, env config, linting, docker-compose
-- [ ] **Phase 2** — DB schema + Alembic migrations (documents, versions, chunks, conflicts, users, permissions, chat, audit)
+- [x] **Phase 2** — DB schema + Alembic migrations (documents, versions, chunks, conflicts, users, permissions, chat, audit)
 - [ ] **Phase 3** — AuthN/AuthZ (sessions, roles: user / document_manager / admin)
 - [ ] **Phase 4** — Ingestion pipeline (PDF/DOCX/TXT, page metadata, chunking, batched embeddings, status tracking)
 - [ ] **Phase 5** — Version management APIs + UI (revisions, approval, supersession, dedupe by hash)

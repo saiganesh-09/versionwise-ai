@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 2 — Database design (up next)
+## Current phase: 3 — Auth (up next)
 
 ## Completed
 
@@ -10,6 +10,10 @@ Updated after each phase. Last updated: 2026-10-10.
 - [x] Phase 1 — Monorepo foundation: FastAPI backend (health/readiness,
       consistent error envelope, settings validation) + Next.js 16 frontend
       (TS strict, Tailwind, typed API client, backend status indicator).
+- [x] Phase 2 — Full schema (10 tables, native PG enums, half-open temporal
+      intervals, HNSW cosine index) + Alembic migrations verified on real
+      Postgres, upgrade/downgrade/upgrade cycle clean. See
+      docs/DATABASE_SCHEMA.md.
 
 ## Test results
 
@@ -26,6 +30,8 @@ Updated after each phase. Last updated: 2026-10-10.
 | `docker compose up -d` | ✅ pass | postgres healthy, storage up, bucket created |
 | pgvector extension | ✅ 0.8.7 | `CREATE EXTENSION vector` verified |
 | Backend readiness w/ DB | ✅ 200 ready | end-to-end DB connectivity |
+| `alembic upgrade/downgrade/upgrade` | ✅ pass | clean cycle on real Postgres |
+| Backend `pytest` (Phase 2) | ✅ 19/19 | constraints, intervals, pgvector, cascades |
 
 ## Known limitations
 
