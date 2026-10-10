@@ -27,7 +27,7 @@ human review rather than silently averaged into an answer.
 |---|---|
 | Frontend | Next.js (App Router), TypeScript strict, Tailwind, shadcn/ui, Recharts |
 | Backend | Python 3.13, FastAPI, SQLAlchemy 2.x, Alembic, Pydantic v2 |
-| Data | PostgreSQL 16 + pgvector, S3-compatible object storage (MinIO dev) |
+| Data | PostgreSQL 16 + pgvector, S3-compatible object storage (RustFS dev) |
 | AI | Pluggable LLM + embedding provider adapters |
 
 ## Quickstart

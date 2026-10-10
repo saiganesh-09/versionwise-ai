@@ -23,14 +23,26 @@ Updated after each phase. Last updated: 2026-10-10.
 | Frontend `tsc --noEmit` | ✅ pass | |
 | Frontend `next build` | ✅ pass | static prerender |
 | Frontend dev server `GET /` | ✅ 200 | page renders |
+| `docker compose up -d` | ✅ pass | postgres healthy, storage up, bucket created |
+| pgvector extension | ✅ 0.8.7 | `CREATE EXTENSION vector` verified |
+| Backend readiness w/ DB | ✅ 200 ready | end-to-end DB connectivity |
 
 ## Known limitations
 
 - No LLM/embedding credentials configured yet; provider adapters not yet built.
-- Docker daemon must be running for `docker compose up -d` (Postgres/MinIO);
-  not yet verified end-to-end.
-- `npm install` reported 5 high-severity vulnerabilities in template dev
-  dependencies — review before production deploy.
+- ~~Docker engine cannot start~~ **RESOLVED**: installed WSL 2.7.13 +
+  enabled Virtual Machine Platform + reboot. `docker compose up -d` verified:
+  postgres healthy, pgvector 0.8.7 enabled, bucket `versionwise-documents`
+  created, backend `/health/ready` returns `ready`.
+- Object storage dev image changed MinIO → **RustFS** (MinIO stopped
+  publishing container images in 2025 — pulls fail on both Hub and quay.io).
+- `npm audit` flags 5 high-severity issues — all one transitive chain:
+  `braces` (unpatched glob DoS, GHSA-vfj7-8cjw-p6xm) via
+  `eslint-config-next → fast-glob → micromatch`. **No upstream fix exists**
+  (braces@3.0.3 is latest); `npm audit fix --force` would downgrade
+  eslint-config-next 16→14 without removing the package — rejected.
+  Dev-tooling only, nothing ships to production. Re-check when
+  eslint-config-next/fast-glob update.
 
 ## Next up
 

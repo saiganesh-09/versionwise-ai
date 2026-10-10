@@ -18,7 +18,7 @@ something) from **effective time** (when a rule was actually in force).
 | Python | 3.13 | Installed locally; supported by FastAPI/SQLAlchemy 2.x/psycopg 3 |
 | Frontend | Next.js App Router + TS strict + Tailwind + shadcn/ui | Per spec |
 | Database | PostgreSQL 16 + pgvector | Per spec; `pgvector/pgvector` Docker image for dev |
-| Object storage | S3-compatible; MinIO in dev via docker-compose | Per spec; local adapter for tests |
+| Object storage | S3-compatible; RustFS in dev via docker-compose | MinIO stopped publishing images (2025); RustFS is the maintained drop-in |
 | Temporal model | Half-open interval `[effective_from, effective_until)`; NULL end = open-ended | Unambiguous boundary semantics; indexed range queries |
 | LLM/embeddings | Provider adapters behind interfaces; OpenAI-compatible default | Swappable without touching retrieval logic |
 | Auth | Session/JWT bearer for API + role-based permissions | Implemented Phase 3; documented then |
@@ -76,7 +76,7 @@ npm install
 npm run dev                                             # http://localhost:3000
 
 # Infrastructure (Phase 2+)
-docker compose up -d postgres minio
+docker compose up -d postgres storage
 ```
 
 ## Known blockers / open items
