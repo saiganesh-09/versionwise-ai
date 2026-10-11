@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,10 +23,18 @@ const credentialsSchema = z.object({
 type Credentials = z.infer<typeof credentialsSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [user, setUser] = useState<UserResponse | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Already-authenticated visitors go straight into the app.
+  useEffect(() => {
+    getMe()
+      .then(() => router.replace("/dashboard"))
+      .catch(() => {});
+  }, [router]);
 
   const {
     register,
@@ -42,7 +51,7 @@ export default function LoginPage() {
       }
       const tokens = await login(data.email, data.password);
       setToken(tokens.access_token);
-      setUser(await getMe());
+      router.replace("/dashboard");
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Request failed");
     } finally {
@@ -82,9 +91,15 @@ export default function LoginPage() {
               </dd>
             </div>
           </dl>
+          <Link
+            href="/dashboard"
+            className="mt-6 block w-full rounded-lg bg-blue-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-800"
+          >
+            Continue to dashboard →
+          </Link>
           <button
             onClick={onLogout}
-            className="mt-6 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+            className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
           >
             Sign out
           </button>
