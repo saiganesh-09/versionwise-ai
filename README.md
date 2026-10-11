@@ -79,12 +79,13 @@ citation validity, refusal accuracy, conflict flag rate). Details:
 
 ## Deployment
 
-```bash
-docker compose -f docker-compose.prod.yml --env-file .env up -d --build
-```
+**Live frontend**: https://frontend-ion8xnzy3-saiganesh-09s-projects.vercel.app
+(auto-deploys on every push to `main`)
 
-Managed path (Vercel + Render + managed pgvector + S3) and the production
-checklist: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Managed path used: **Vercel** (frontend) + **Render Blueprint** (backend +
+Postgres 16, `render.yaml` in repo root). Self-contained alternative:
+`docker-compose.prod.yml`. Full matrix + checklist:
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Repository layout
 
