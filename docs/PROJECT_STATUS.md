@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 9 — Full frontend (up next)
+## Current phase: 10 — API hardening (up next)
 
 ## Completed
 
@@ -46,6 +46,14 @@ Updated after each phase. Last updated: 2026-10-10.
       Real run: all metrics 1.0 (see docs/EVALUATION.md). Also set a real
       RETRIEVAL_SIMILARITY_THRESHOLD floor (0.15) + compare-with-one-date
       intent parsing.
+- [x] Phase 9 — Full frontend: shadcn/ui (Base UI variant) + Tailwind 4 +
+      Lucide. Landing, /dashboard (stats + open conflicts), /documents
+      (search/filter/create), /documents/[id] (version timeline, approve/
+      reject, upload w/ effective dates, side-by-side compare diff), /chat
+      (as-of date picker, intent badge, evidence citations w/ version +
+      effective range + page, conflict warnings), /conflicts (detect +
+      expand-evidence + confirm/dismiss/resolve), /settings (public config).
+      Auth shell w/ guard + Suspense boundary for Next 16 Cache Components.
 
 ## Test results
 

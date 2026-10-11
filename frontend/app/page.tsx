@@ -1,58 +1,76 @@
 import Link from "next/link";
 import { BackendStatus } from "@/components/backend-status";
+import {
+  AlertTriangle,
+  CalendarClock,
+  FileSearch,
+  GitBranch,
+} from "lucide-react";
 
-const features = [
+const FEATURES = [
   {
+    icon: CalendarClock,
     title: "Time-aware answers",
-    body: "Ask about any point in time — answers come from the document version that was actually in force then.",
+    body: "Ask 'what was the policy in February 2025?' and get the version that was in force then — not the newest upload.",
   },
   {
-    title: "Verifiable citations",
-    body: "Every claim links back to a document name, version, page, and effective-date range.",
+    icon: GitBranch,
+    title: "Versioned documents",
+    body: "Every revision is immutable, dated, approved, and kept — compare any two revisions paragraph by paragraph.",
   },
   {
-    title: "Conflict detection",
-    body: "Contradictions across versions are flagged for review instead of silently averaged away.",
+    icon: FileSearch,
+    title: "Evidence, not vibes",
+    body: "Answers cite the exact document, version, page, and effective range — and say so when evidence is missing.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Conflicts surfaced",
+    body: "Contradictory policies across sources are detected, stored, and routed to human review — never silently averaged.",
   },
 ];
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center bg-slate-50 px-6 py-24 text-center dark:bg-slate-950">
-      <BackendStatus />
-      <h1 className="mt-8 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-slate-50">
-        VersionWise AI
-      </h1>
-      <p className="mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-        Version-aware document intelligence. Ask questions against your policies
-        and get answers grounded in the version that was valid at the time —
-        with citations you can verify.
-      </p>
-      <div className="mt-14 grid w-full max-w-4xl gap-4 sm:grid-cols-3">
-        {features.map((f) => (
-          <div
-            key={f.title}
-            className="rounded-xl border border-slate-200 bg-white p-6 text-left shadow-sm dark:border-slate-800 dark:bg-slate-900"
+    <main className="flex flex-1 flex-col items-center bg-gradient-to-b from-slate-50 to-white px-6 dark:from-slate-950 dark:to-slate-900">
+      <div className="flex w-full max-w-4xl flex-col items-center pt-20 text-center">
+        <BackendStatus />
+        <h1 className="mt-6 text-5xl font-bold tracking-tight">
+          VersionWise <span className="text-blue-700">AI</span>
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          Enterprise document intelligence that knows <em>when</em> a rule was true.
+          Upload versioned policies, ask questions for any point in time, and get
+          answers grounded in the version that was actually in force.
+        </p>
+        <div className="mt-8 flex gap-3">
+          <Link
+            href="/login"
+            className="rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-800"
           >
-            <h2 className="font-semibold text-slate-900 dark:text-slate-100">
-              {f.title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              {f.body}
-            </p>
+            Sign in
+          </Link>
+          <a
+            href="#how"
+            className="rounded-lg border px-6 py-2.5 text-sm font-medium hover:bg-muted"
+          >
+            How it works
+          </a>
+        </div>
+      </div>
+
+      <div id="how" className="mt-24 grid w-full max-w-5xl gap-6 pb-24 sm:grid-cols-2">
+        {FEATURES.map(({ icon: Icon, title, body }) => (
+          <div
+            key={title}
+            className="rounded-xl border bg-card p-6 text-left shadow-sm"
+          >
+            <Icon className="h-6 w-6 text-blue-700" />
+            <h2 className="mt-3 font-semibold">{title}</h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
           </div>
         ))}
       </div>
-      <Link
-        href="/login"
-        className="mt-10 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-800"
-      >
-        Sign in
-      </Link>
-      <p className="mt-12 text-xs text-slate-400">
-        Early development build — dashboard, documents, and chat arrive in later
-        phases.
-      </p>
     </main>
   );
 }

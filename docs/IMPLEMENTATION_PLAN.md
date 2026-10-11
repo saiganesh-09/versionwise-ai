@@ -35,7 +35,7 @@ something) from **effective time** (when a rule was actually in force).
 - [x] **Phase 6** — Temporal retrieval engine (intent parsing → eligibility filter → vector search → evidence → grounded answer → citation validation)
 - [x] **Phase 7** — Conflict detection engine + human review workflow
 - [x] **Phase 8** — Version comparison (deterministic diff + LLM summary) — `GET /compare` ships paragraph-level diffs; shipped with Phase 7
-- [ ] **Phase 9** — Full frontend (landing, dashboard, library, doc detail, chat, compare, conflicts, settings)
+- [x] **Phase 9** — Full frontend (landing, dashboard, library, doc detail, chat, compare, conflicts, settings)
 - [ ] **Phase 10** — API hardening (versioned routes, consistent errors, pagination, no N+1)
 - [x] **Phase 11** — Test suite + eval corpus + metrics (version-selection accuracy, Recall@k, citation correctness) — 99 tests, `eval/corpus`, `run_eval.py`, all metrics 1.0; see docs/EVALUATION.md
 - [ ] **Phase 12** — Security & reliability (rate limits, prompt-injection defenses, audit)
