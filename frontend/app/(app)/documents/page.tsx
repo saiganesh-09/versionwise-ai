@@ -1,5 +1,7 @@
 "use client";
 
+export const instant = false;
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createDocument, listDocuments, type DocumentItem } from "@/lib/api";

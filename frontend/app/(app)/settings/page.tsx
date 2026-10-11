@@ -1,5 +1,7 @@
 "use client";
 
+export const instant = false;
+
 import { useEffect, useState } from "react";
 import { getPublicSettings, type PublicSettings } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
