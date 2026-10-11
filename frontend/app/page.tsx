@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BackendStatus } from "@/components/backend-status";
 
 const features = [
@@ -42,6 +43,12 @@ export default function Home() {
           </div>
         ))}
       </div>
+      <Link
+        href="/login"
+        className="mt-10 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-800"
+      >
+        Sign in
+      </Link>
       <p className="mt-12 text-xs text-slate-400">
         Early development build — dashboard, documents, and chat arrive in later
         phases.

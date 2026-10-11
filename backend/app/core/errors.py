@@ -28,6 +28,21 @@ class AppError(Exception):
         self.details = details or {}
 
 
+class NotFoundError(AppError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "not_found"
+
+
+class ConflictError(AppError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "conflict"
+
+
+class BadRequestError(AppError):
+    status_code = status.HTTP_400_BAD_REQUEST
+    code = "bad_request"
+
+
 def error_response(
     status_code: int, code: str, message: str, details: dict | None = None
 ) -> JSONResponse:
@@ -48,7 +63,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         details = {"fields": [{"loc": list(e["loc"]), "msg": e["msg"]} for e in exc.errors()]}
         return error_response(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             "validation_error",
             "Request validation failed.",
             details,

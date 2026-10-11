@@ -1,0 +1,47 @@
+"""Document request/response schemas."""
+
+import uuid
+from datetime import date, datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class DocumentCreateRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=500)
+    description: str | None = None
+    document_type: str = Field(default="general", max_length=100)
+
+
+class DocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    description: str | None
+    document_type: str
+    owner_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class DocumentVersionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    document_id: uuid.UUID
+    version_number: int
+    original_filename: str
+    file_hash: str
+    effective_from: date
+    effective_until: date | None
+    status: str
+    ingestion_status: str
+    uploaded_by: uuid.UUID
+    uploaded_at: datetime
+    approved_by: uuid.UUID | None
+    approved_at: datetime | None
+    supersedes_version_id: uuid.UUID | None
+
+
+class DocumentDetailResponse(DocumentResponse):
+    versions: list[DocumentVersionResponse] = []

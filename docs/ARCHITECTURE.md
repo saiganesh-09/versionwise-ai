@@ -81,8 +81,15 @@ Retries delete-and-rebuild that version's chunks (idempotent).
 
 ## Security model
 
+- **AuthN**: JWT bearer tokens (HS256, `SECRET_KEY`, configurable expiry).
+  Bearer over httpOnly cookie = no CSRF surface; the trade-off is client-side
+  token storage (localStorage) — accepted and revisited before production.
+  Passwords: argon2id via pwdlib. Roles never taken from client or token —
+  `get_current_user` reloads the user row every request, so deactivated
+  accounts lose access immediately even with a live token.
 - Backend enforces authZ on every request; document-level permissions joined in
-  retrieval SQL — never retrieve-then-filter-in-prompt.
+  retrieval SQL — never retrieve-then-filter-in-prompt. Invisible documents
+  return 404 (not 403) so existence isn't leaked.
 - Uploaded documents are untrusted input: content is delimited in prompts and
   can never override system instructions (prompt-injection defense, Phase 12).
 - Secrets only via env vars; `.env` gitignored.

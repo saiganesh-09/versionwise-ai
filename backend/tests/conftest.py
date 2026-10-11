@@ -18,8 +18,24 @@ TEST_DB_NAME = "versionwise_test"
 
 
 @pytest.fixture(scope="session")
-def client() -> TestClient:
-    return TestClient(create_app())
+def client(db_url: str) -> Iterator[TestClient]:
+    """API client bound to the migrated test database."""
+    from app.db.session import get_session
+
+    engine = create_engine(db_url)
+    TestingSession = sessionmaker(bind=engine, expire_on_commit=False)
+
+    def override_get_session() -> Iterator[Session]:
+        s = TestingSession()
+        try:
+            yield s
+        finally:
+            s.close()
+
+    app = create_app()
+    app.dependency_overrides[get_session] = override_get_session
+    yield TestClient(app)
+    engine.dispose()
 
 
 def _admin_url() -> str | None:
@@ -89,6 +105,17 @@ def session(db_engine: Engine) -> Iterator[Session]:
         if trans.is_active:  # a failed flush may have already rolled it back
             trans.rollback()
         conn.close()
+
+
+@pytest.fixture()
+def commit_session(db_engine: Engine) -> Iterator[Session]:
+    """Session that really commits — for seeding data API endpoints must see
+    (the per-test `session` fixture rolls back)."""
+    sess = sessionmaker(bind=db_engine, expire_on_commit=False)()
+    try:
+        yield sess
+    finally:
+        sess.close()
 
 
 # --- Row factories -------------------------------------------------------

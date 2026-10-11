@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 3 — Auth (up next)
+## Current phase: 4 — Ingestion pipeline (up next)
 
 ## Completed
 
@@ -14,6 +14,10 @@ Updated after each phase. Last updated: 2026-10-10.
       intervals, HNSW cosine index) + Alembic migrations verified on real
       Postgres, upgrade/downgrade/upgrade cycle clean. See
       docs/DATABASE_SCHEMA.md.
+- [x] Phase 3 — JWT bearer auth (argon2id hashes), register/login/logout/me,
+      roles, permission-filtered document list/detail, audit logging, frontend
+      /login page (real credentials, RHF+Zod), scripts/create_user.py for
+      role grants.
 
 ## Test results
 
@@ -32,6 +36,8 @@ Updated after each phase. Last updated: 2026-10-10.
 | Backend readiness w/ DB | ✅ 200 ready | end-to-end DB connectivity |
 | `alembic upgrade/downgrade/upgrade` | ✅ pass | clean cycle on real Postgres |
 | Backend `pytest` (Phase 2) | ✅ 19/19 | constraints, intervals, pgvector, cascades |
+| Backend `pytest` (Phase 3) | ✅ 33/33 total | auth flow, 401s, cross-user isolation, admin, role-escalation block |
+| Live auth smoke test | ✅ pass | register→login→me→create doc→401 unauth |
 
 ## Known limitations
 
