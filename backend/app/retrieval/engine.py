@@ -255,6 +255,15 @@ def answer_question(
             f"documented default ({dates})."
         )
 
+    # For compare intents the relevance signal is the temporal structure
+    # itself — the question is "what differed between these periods", which
+    # carries no required topical vocabulary. Eligibility + top-k ranking
+    # do the work; the similarity floor stays for current/as_of questions
+    # where refusal honesty depends on it.
+    min_similarity = (
+        0.0 if intent.kind == "compare" else settings.retrieval_similarity_threshold
+    )
+
     all_evidence: list[Evidence] = []
     for d in dates:
         versions, w = eligible_versions(session, user, d, document_id=document_id)
@@ -265,7 +274,7 @@ def answer_question(
             search_query,
             [v.id for v in versions],
             top_k=settings.retrieval_top_k,
-            min_similarity=settings.retrieval_similarity_threshold,
+            min_similarity=min_similarity,
         )
         all_evidence.extend(_to_evidence(session, rows))
 
