@@ -44,6 +44,15 @@ class DocumentVersionResponse(BaseModel):
     extra: dict = {}  # ingestion stats/errors — never secrets
 
 
+class VersionApproveRequest(BaseModel):
+    supersede_version_id: uuid.UUID | None = None
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class VersionRejectRequest(BaseModel):
+    reason: str | None = Field(default=None, max_length=1000)
+
+
 class ChunkResponse(BaseModel):
     """Embedding intentionally excluded — not useful to clients."""
 

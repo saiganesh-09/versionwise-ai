@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 5 — Version management (up next)
+## Current phase: 6 — Retrieval engine (up next)
 
 ## Completed
 
@@ -23,6 +23,10 @@ Updated after each phase. Last updated: 2026-10-10.
       parsers w/ page+section metadata, scanned-PDF → explicit OCR failure,
       token-aware chunker (tiktoken), batched pluggable embeddings
       (openai|mock), idempotent reingest.
+- [x] Phase 5 — Version lifecycle: approve (requires ingestion completed),
+      reject → archived, supersession via approve (same-document, approved-
+      only target), manage-permission enforcement, full audit trail,
+      history preserved on supersede.
 
 ## Test results
 
@@ -45,6 +49,7 @@ Updated after each phase. Last updated: 2026-10-10.
 | Live auth smoke test | ✅ pass | register→login→me→create doc→401 unauth |
 | Backend `pytest` (Phase 4) | ✅ 46/46 total | all parsers, scanned-PDF, dedupe, oversize, idempotent reingest |
 | Live ingest → RustFS | ✅ pass | upload→version→chunks→object stored in bucket |
+| Backend `pytest` (Phase 5) | ✅ 57/57 total | approve/reject/supersede rules, perms, audit, lineage |
 
 ## Known limitations
 

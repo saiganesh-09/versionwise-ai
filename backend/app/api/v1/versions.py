@@ -23,9 +23,15 @@ from app.models import (
     VersionStatus,
 )
 from app.repositories import documents as doc_repo
-from app.schemas.document import ChunkResponse, DocumentVersionResponse
+from app.schemas.document import (
+    ChunkResponse,
+    DocumentVersionResponse,
+    VersionApproveRequest,
+    VersionRejectRequest,
+)
 from app.services.audit import log_action
 from app.services.storage import get_storage
+from app.services.versions import approve_version, reject_version
 
 router = APIRouter(tags=["versions"])
 
@@ -187,6 +193,47 @@ def list_version_chunks(
             select(Chunk).where(Chunk.version_id == version_id).order_by(Chunk.chunk_index)
         ).scalars()
     )
+
+
+def _load_version_for_manage(
+    session: Session, user, version_id: uuid.UUID
+) -> DocumentVersion:
+    version = session.get(DocumentVersion, version_id)
+    if version is None or doc_repo.get_visible(session, user, version.document_id) is None:
+        raise NotFoundError("Version not found.")
+    doc = doc_repo.get_document(session, version.document_id)
+    assert doc is not None
+    if not doc_repo.can_manage(session, user, doc):
+        raise ForbiddenError("You do not have manage access to this document.")
+    return version
+
+
+@router.post("/versions/{version_id}/approve", response_model=DocumentVersionResponse)
+def approve(
+    version_id: uuid.UUID,
+    body: VersionApproveRequest,
+    current: CurrentUser,
+    session: Session = Depends(get_session),
+) -> DocumentVersion:
+    version = _load_version_for_manage(session, current, version_id)
+    return approve_version(
+        session,
+        version,
+        current,
+        supersede_version_id=body.supersede_version_id,
+        note=body.note,
+    )
+
+
+@router.post("/versions/{version_id}/reject", response_model=DocumentVersionResponse)
+def reject(
+    version_id: uuid.UUID,
+    body: VersionRejectRequest,
+    current: CurrentUser,
+    session: Session = Depends(get_session),
+) -> DocumentVersion:
+    version = _load_version_for_manage(session, current, version_id)
+    return reject_version(session, version, current, reason=body.reason)
 
 
 @router.post("/versions/{version_id}/reingest", response_model=DocumentVersionResponse)
