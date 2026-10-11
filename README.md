@@ -1,68 +1,110 @@
 # VersionWise AI
 
-**Version-aware enterprise document intelligence.** A RAG platform that answers
-questions using the document version that was *actually in force* at the time
-asked about — not just whatever was uploaded most recently.
+**Version-aware enterprise document intelligence.** A production-oriented RAG
+platform that answers questions using the document version *actually in force*
+at the time asked about — not whatever was uploaded most recently.
 
-> Status: under active development. See `docs/PROJECT_STATUS.md` and
-> `docs/IMPLEMENTATION_PLAN.md` for progress.
+## The problem it solves
 
-## The problem
+Enterprise AI assistants silently retrieve outdated, conflicting, or
+historically-invalid policies. VersionWise AI separates **upload time** from
+**effective time**:
 
-Enterprise AI assistants routinely retrieve outdated policies, conflicting
-documents, or rules that weren't valid when a question was asked. VersionWise AI
-separates **upload time** from **effective time**, so:
+- *"What is the current leave allowance?"* → the approved version valid today
+- *"What was it in February 2025?"* → the version in force then (even if since superseded)
+- *"What changed between 2024 and 2026?"* → evidence from both periods + a deterministic diff
+- Contradictions across documents are **detected, persisted, and surfaced to
+  humans** — never averaged away
 
-- "What is the *current* leave policy?" → the approved version valid today.
-- "What was the allowance in *February 2025*?" → the version valid then.
-- "What changed between 2024 and 2026?" → a deterministic diff of the two
-  versions, summarized by the LLM — never invented.
+## Feature map
 
-Conflicting statements across versions are detected, persisted, and flagged for
-human review rather than silently averaged into an answer.
+- **Versioned documents** — immutable revisions, half-open effective intervals
+  `[from, until)`, lifecycle `draft → pending_review → approved → superseded → archived`,
+  separate ingestion tracking
+- **Temporal retrieval** — deterministic intent parsing (current / as-of /
+  compare), SQL-level eligibility (permission + status + interval + ingestion),
+  pgvector search, evidence objects → grounded answers with citation validation
+- **No fabrication** — insufficient evidence is said out loud; ambiguous dates
+  are flagged, not guessed; citations outside retrieved evidence are dropped
+- **Conflict detection** — cross-doc contradictions vs same-doc legitimate
+  updates, dedupe, human confirm/dismiss/resolve workflow, chat warnings
+- **Real app, not a chat box** — dashboard, library, revision timeline,
+  upload+approve, side-by-side diff, citation-rich chat, conflict review
+- **AuthZ in SQL** — owner / explicit grant / admin; invisible docs return 404
+- **Provider-agnostic AI** — OpenAI-compatible or deterministic offline mocks;
+  the whole pipeline is testable with zero API keys
 
 ## Stack
 
 | Tier | Tech |
 |---|---|
-| Frontend | Next.js (App Router), TypeScript strict, Tailwind, shadcn/ui, Recharts |
-| Backend | Python 3.13, FastAPI, SQLAlchemy 2.x, Alembic, Pydantic v2 |
-| Data | PostgreSQL 16 + pgvector, S3-compatible object storage (RustFS dev) |
-| AI | Pluggable LLM + embedding provider adapters |
+| Frontend | Next.js 16 (App Router, Cache Components), TS strict, Tailwind 4, shadcn/ui |
+| Backend | Python 3.13, FastAPI, SQLAlchemy 2.x, Alembic, Pydantic 2 |
+| Data | PostgreSQL 16 + pgvector (HNSW cosine), RustFS/S3 object storage |
+| AI | Pluggable LLM + embedding adapters (`mock` ↔ `openai`) |
 
 ## Quickstart
 
 ```bash
-cp .env.example .env          # fill in values; never commit .env
+cp .env.example .env          # dev defaults work out of the box
 
-docker compose up -d          # postgres + minio (Phase 2+)
+docker compose up -d          # postgres+pgvector + RustFS
 
 cd backend
-python -m venv .venv && source .venv/Scripts/activate   # Git Bash / Windows
-# source .venv/bin/activate                               # macOS/Linux
+python -m venv .venv && source .venv/Scripts/activate   # Windows/Git Bash
 pip install -e ".[dev]"
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000               # :8000/docs
 
-cd ../frontend
-npm install
-npm run dev                   # http://localhost:3000
+cd ../frontend && npm install && npm run dev            # :3000
 ```
 
-Health check: `curl http://localhost:8000/api/v1/health`
+Then demo data in one shot:
+
+```bash
+python ../scripts/seed_demo.py    # demo@versionwise.dev / demo-password-123
+```
+
+## Testing & evaluation
+
+```bash
+cd backend && pytest            # 105 tests — real Postgres (versionwise_test)
+ruff check app tests migrations
+
+python ../scripts/run_eval.py   # full eval on dedicated versionwise_eval DB
+```
+
+Latest eval run — **all metrics 1.0** (version selection, answer terms,
+citation validity, refusal accuracy, conflict flag rate). Details:
+[docs/EVALUATION.md](docs/EVALUATION.md).
+
+## Deployment
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+```
+
+Managed path (Vercel + Render + managed pgvector + S3) and the production
+checklist: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Repository layout
 
 ```
-frontend/    Next.js application
-backend/     FastAPI application (app/, migrations/, tests/)
-docs/        Architecture, plan, status
-scripts/     Utility scripts
-docker-compose.yml
-.env.example
+frontend/    Next.js app — landing + (app): dashboard, documents, chat,
+             conflicts, settings
+backend/     FastAPI — app/{api,core,db,models,schemas,repositories,services,
+             ingestion,retrieval,conflict_detection,eval}, migrations/, tests/
+eval/        corpus (synthetic versioned policies) + results
+scripts/     create_user.py, run_eval.py, seed_demo.py
+docs/        ARCHITECTURE, IMPLEMENTATION_PLAN, PROJECT_STATUS, EVALUATION,
+             DEPLOYMENT
+docker-compose.yml         dev infra (postgres + RustFS)
+docker-compose.prod.yml    self-contained prod stack
 ```
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
-- [Project status](docs/PROJECT_STATUS.md)
+- [Architecture](docs/ARCHITECTURE.md) — layers, data model, retrieval pipeline, security
+- [Implementation plan](docs/IMPLEMENTATION_PLAN.md) — phase checklist (14/14 done)
+- [Project status](docs/PROJECT_STATUS.md) — verification matrix
+- [Evaluation](docs/EVALUATION.md) — corpus + measured metrics
+- [Deployment](docs/DEPLOYMENT.md) — env matrix + prod checklist

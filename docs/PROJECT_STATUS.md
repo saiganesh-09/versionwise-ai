@@ -2,7 +2,13 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 14 — README/portfolio polish (up next)
+## Status: ALL 14 PHASES COMPLETE
+
+The platform is feature-complete, tested (105 backend tests, all metrics
+1.0 on the eval corpus), documented, and deployment-ready (verified
+Dockerfiles + compose.prod). Remaining optional work: browser screenshots
+for portfolio, real API-key run, httpOnly-cookie session variant,
+Redis-backed rate limiting for multi-replica deploys.
 
 ## Completed
 

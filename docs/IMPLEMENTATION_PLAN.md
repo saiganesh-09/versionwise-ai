@@ -40,7 +40,7 @@ something) from **effective time** (when a rule was actually in force).
 - [x] **Phase 11** — Test suite + eval corpus + metrics (version-selection accuracy, Recall@k, citation correctness) — 99 tests, `eval/corpus`, `run_eval.py`, all metrics 1.0; see docs/EVALUATION.md
 - [x] **Phase 12** — Security & reliability (rate limits, prompt-injection defenses, audit)
 - [x] **Phase 13** — Deployment prep (Vercel + Python host + managed Postgres + object storage) — Dockerfiles verified, compose.prod, DEPLOYMENT.md
-- [ ] **Phase 14** — README/portfolio polish, screenshots, eval report
+- [x] **Phase 14** — README/portfolio polish, screenshots, eval report — README + docs/EVALUATION.md complete; screenshots left to the user (no browser automation on this machine)
 
 ## Phase acceptance criteria (summary)
 
