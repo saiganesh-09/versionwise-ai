@@ -14,6 +14,7 @@ import {
   type UserResponse,
 } from "@/lib/api";
 import Link from "next/link";
+import { Scale } from "lucide-react";
 
 const credentialsSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -70,36 +71,37 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <main className="flex flex-1 flex-col items-center justify-center bg-slate-50 px-6 dark:bg-slate-950">
-        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            Signed in
-          </h1>
-          <dl className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+      <main className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-blue-50/40 px-6 bg-background">
+        <div className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-lg shadow-primary/5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Scale className="h-5 w-5" />
+          </span>
+          <h1 className="mt-4 text-xl font-semibold">Signed in</h1>
+          <dl className="mt-4 space-y-2 text-sm text-muted-foreground">
             <div className="flex justify-between">
               <dt>Email</dt>
               <dd className="font-mono">{user.email}</dd>
             </div>
             <div className="flex justify-between">
               <dt>Name</dt>
-              <dd>{user.full_name}</dd>
+              <dd className="text-foreground">{user.full_name}</dd>
             </div>
             <div className="flex justify-between">
               <dt>Role</dt>
-              <dd className="rounded bg-slate-100 px-2 py-0.5 text-xs dark:bg-slate-800">
+              <dd className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 {user.role}
               </dd>
             </div>
           </dl>
           <Link
             href="/dashboard"
-            className="mt-6 block w-full rounded-lg bg-blue-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-800"
+            className="mt-6 block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
           >
             Continue to dashboard →
           </Link>
           <button
             onClick={onLogout}
-            className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+            className="mt-3 w-full rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
           >
             Sign out
           </button>
@@ -109,23 +111,28 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center bg-slate-50 px-6 dark:bg-slate-950">
-      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <Link href="/" className="text-xs text-slate-400 hover:text-slate-600">
-          ← VersionWise AI
-        </Link>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-50">
-          {mode === "login" ? "Sign in" : "Create account"}
+    <main className="relative flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-blue-50/40 px-6 bg-background">
+      <div className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-lg shadow-primary/5">
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <Scale className="h-5 w-5" />
+        </span>
+        <h1 className="mt-4 text-xl font-semibold tracking-tight">
+          {mode === "login" ? "Welcome back" : "Create account"}
         </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {mode === "login"
+            ? "Sign in to your VersionWise workspace"
+            : "Set up your VersionWise account"}
+        </p>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           {mode === "register" && (
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label className="mb-1 block text-sm font-medium text-foreground dark:text-slate-300">
                 Full name
               </label>
               <input
                 {...register("fullName")}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20  bg-background"
                 autoComplete="name"
               />
               {errors.fullName && (
@@ -134,13 +141,13 @@ export default function LoginPage() {
             </div>
           )}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-1 block text-sm font-medium text-foreground dark:text-slate-300">
               Email
             </label>
             <input
               {...register("email")}
               type="email"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20  bg-background"
               autoComplete="email"
             />
             {errors.email && (
@@ -148,13 +155,13 @@ export default function LoginPage() {
             )}
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-1 block text-sm font-medium text-foreground dark:text-slate-300">
               Password
             </label>
             <input
               {...register("password")}
               type="password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20  bg-background"
               autoComplete={mode === "login" ? "current-password" : "new-password"}
             />
             {errors.password && (
@@ -169,7 +176,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50"
+            className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
           >
             {busy ? "Working…" : mode === "login" ? "Sign in" : "Create account"}
           </button>
@@ -179,7 +186,7 @@ export default function LoginPage() {
             setMode(mode === "login" ? "register" : "login");
             setServerError(null);
           }}
-          className="mt-4 w-full text-center text-sm text-blue-700 hover:underline dark:text-blue-400"
+          className="mt-4 w-full text-center text-sm text-primary hover:underline dark:text-blue-400"
         >
           {mode === "login"
             ? "Need an account? Register"
