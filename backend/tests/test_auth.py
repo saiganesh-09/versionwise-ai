@@ -201,3 +201,63 @@ def test_malformed_uuid_422(client: TestClient) -> None:
     resp = client.get("/api/v1/documents/not-a-uuid", headers=headers)
     assert resp.status_code == 422
     assert resp.json()["error"]["code"] == "validation_error"
+
+
+def test_document_share_grant_and_revoke(client: TestClient) -> None:
+    owner_email = f"share-owner-{uuid.uuid4().hex[:8]}@example.com"
+    other_email = f"share-other-{uuid.uuid4().hex[:8]}@example.com"
+    register(client, owner_email)
+    register(client, other_email)
+    owner = auth_headers(login(client, owner_email))
+    other = auth_headers(login(client, other_email))
+    resp = client.post(
+        "/api/v1/documents", headers=owner,
+        json={"title": "Shared Policy", "document_type": "policy"},
+    )
+    doc_id = resp.json()["id"]
+
+    # Other user can't see it yet
+    assert client.get(
+        f"/api/v1/documents/{doc_id}", headers=other
+    ).status_code == 404
+
+    # Grant read access
+    r = client.post(
+        f"/api/v1/documents/{doc_id}/permissions", headers=owner,
+        json={"email": other_email, "permission": "read"},
+    )
+    assert r.status_code == 201, r.text
+    assert r.json()["permission"] == "read"
+
+    # Now visible
+    assert client.get(
+        f"/api/v1/documents/{doc_id}", headers=other
+    ).status_code == 200
+    assert any(
+        d["id"] == doc_id
+        for d in client.get("/api/v1/documents", headers=other).json()
+    )
+
+    # List grants (grantee can't — read only)
+    grants = client.get(
+        f"/api/v1/documents/{doc_id}/permissions", headers=owner
+    ).json()
+    assert len(grants) == 1
+    assert client.get(
+        f"/api/v1/documents/{doc_id}/permissions", headers=other
+    ).status_code == 403
+
+    # Revoke → hidden again
+    uid = grants[0]["user_id"]
+    assert client.delete(
+        f"/api/v1/documents/{doc_id}/permissions/{uid}", headers=owner
+    ).status_code == 204
+    assert client.get(
+        f"/api/v1/documents/{doc_id}", headers=other
+    ).status_code == 404
+
+    # Edge cases
+    assert client.post(
+        f"/api/v1/documents/{doc_id}/permissions", headers=owner,
+        json={"email": "ghost@example.com", "permission": "read"},
+    ).status_code == 404

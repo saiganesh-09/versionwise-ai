@@ -9,6 +9,15 @@ import {
   type DashboardStats,
 } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, FileText, GitBranch, Layers, MessagesSquare } from "lucide-react";
@@ -79,15 +88,52 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-base">Versions by status</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {Object.entries(stats.versions_by_status).length === 0 && (
+          <CardContent>
+            {Object.keys(stats.versions_by_status).length === 0 ? (
               <p className="text-sm text-muted-foreground">No versions yet.</p>
+            ) : (
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={Object.entries(stats.versions_by_status).map(
+                      ([status, count]) => ({
+                        status: status.replace(/_/g, " "),
+                        count,
+                      }),
+                    )}
+                    margin={{ top: 4, right: 8, bottom: 0, left: -20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      dataKey="status"
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <RechartsTooltip
+                      cursor={{ fill: "oklch(0.94 0.03 264)" }}
+                      contentStyle={{
+                        borderRadius: 8,
+                        fontSize: 12,
+                        border: "1px solid oklch(0.905 0.015 264)",
+                      }}
+                    />
+                    <Bar
+                      dataKey="count"
+                      fill="oklch(0.51 0.23 264)"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={48}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             )}
-            {Object.entries(stats.versions_by_status).map(([status, count]) => (
-              <Badge key={status} variant="secondary" className="px-3 py-1 text-xs">
-                {status}: {count}
-              </Badge>
-            ))}
           </CardContent>
         </Card>
         <Card>

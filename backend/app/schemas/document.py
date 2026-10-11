@@ -71,3 +71,18 @@ class ChunkResponse(BaseModel):
 
 class DocumentDetailResponse(DocumentResponse):
     versions: list[DocumentVersionResponse] = []
+
+
+class GrantRequest(BaseModel):
+    email: str = Field(max_length=320)
+    permission: str = Field(pattern="^(read|write|manage)$")
+
+
+class GrantResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: uuid.UUID
+    email: str
+    full_name: str
+    permission: str
+    created_at: datetime

@@ -349,3 +349,67 @@ export interface PublicSettings {
 export function getPublicSettings(): Promise<PublicSettings> {
   return authRequest<PublicSettings>("/api/v1/settings/public");
 }
+
+// --- Chat sessions -----------------------------------------------------------
+
+export interface ChatSessionItem {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessageItem {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  as_of_date: string | null;
+  created_at: string;
+}
+
+export interface ChatSessionDetail extends ChatSessionItem {
+  messages: ChatMessageItem[];
+}
+
+export function listChatSessions(): Promise<ChatSessionItem[]> {
+  return authRequest<ChatSessionItem[]>("/api/v1/chat/sessions");
+}
+
+export function getChatSession(id: string): Promise<ChatSessionDetail> {
+  return authRequest<ChatSessionDetail>(`/api/v1/chat/sessions/${id}`);
+}
+
+// --- Document sharing --------------------------------------------------------
+
+export interface GrantItem {
+  user_id: string;
+  email: string;
+  full_name: string;
+  permission: string;
+  created_at: string;
+}
+
+export function listPermissions(documentId: string): Promise<GrantItem[]> {
+  return authRequest<GrantItem[]>(`/api/v1/documents/${documentId}/permissions`);
+}
+
+export function grantPermission(
+  documentId: string,
+  email: string,
+  permission: "read" | "write" | "manage",
+): Promise<GrantItem> {
+  return authRequest<GrantItem>(`/api/v1/documents/${documentId}/permissions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, permission }),
+  });
+}
+
+export function revokePermission(
+  documentId: string,
+  userId: string,
+): Promise<void> {
+  return authRequest(`/api/v1/documents/${documentId}/permissions/${userId}`, {
+    method: "DELETE",
+  });
+}
