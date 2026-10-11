@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 4 — Ingestion pipeline (up next)
+## Current phase: 5 — Version management (up next)
 
 ## Completed
 
@@ -18,6 +18,11 @@ Updated after each phase. Last updated: 2026-10-10.
       roles, permission-filtered document list/detail, audit logging, frontend
       /login page (real credentials, RHF+Zod), scripts/create_user.py for
       role grants.
+- [x] Phase 4 — Ingestion pipeline: upload validation (ext + magic bytes +
+      size), SHA-256 dedupe, RustFS/local storage adapters, PDF/DOCX/TXT
+      parsers w/ page+section metadata, scanned-PDF → explicit OCR failure,
+      token-aware chunker (tiktoken), batched pluggable embeddings
+      (openai|mock), idempotent reingest.
 
 ## Test results
 
@@ -38,6 +43,8 @@ Updated after each phase. Last updated: 2026-10-10.
 | Backend `pytest` (Phase 2) | ✅ 19/19 | constraints, intervals, pgvector, cascades |
 | Backend `pytest` (Phase 3) | ✅ 33/33 total | auth flow, 401s, cross-user isolation, admin, role-escalation block |
 | Live auth smoke test | ✅ pass | register→login→me→create doc→401 unauth |
+| Backend `pytest` (Phase 4) | ✅ 46/46 total | all parsers, scanned-PDF, dedupe, oversize, idempotent reingest |
+| Live ingest → RustFS | ✅ pass | upload→version→chunks→object stored in bucket |
 
 ## Known limitations
 

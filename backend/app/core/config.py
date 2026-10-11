@@ -56,6 +56,12 @@ class Settings(BaseSettings):
     object_storage_access_key: str | None = None
     object_storage_secret_key: str | None = None
     object_storage_region: str = "us-east-1"
+    local_storage_dir: str = ".local-storage"  # used when provider=local
+
+    # --- Upload limits ---
+    max_upload_mb: int = 25
+    embedding_batch_size: int = 64
+    embedding_timeout_seconds: float = 30.0
 
     # --- Retrieval defaults ---
     retrieval_top_k: int = 8

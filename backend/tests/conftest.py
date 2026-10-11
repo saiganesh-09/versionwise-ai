@@ -1,7 +1,14 @@
 import os
+import tempfile
 import uuid
 from collections.abc import Iterator
 from datetime import date
+
+# Test-environment defaults — set BEFORE any app module reads settings.
+# Local storage keeps uploads off S3; mock embeddings need no API key.
+os.environ.setdefault("OBJECT_STORAGE_PROVIDER", "local")
+os.environ.setdefault("LOCAL_STORAGE_DIR", tempfile.mkdtemp(prefix="vw-test-storage-"))
+os.environ.setdefault("EMBEDDING_PROVIDER", "mock")
 
 import pytest
 from fastapi.testclient import TestClient

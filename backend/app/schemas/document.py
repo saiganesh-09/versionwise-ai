@@ -41,6 +41,23 @@ class DocumentVersionResponse(BaseModel):
     approved_by: uuid.UUID | None
     approved_at: datetime | None
     supersedes_version_id: uuid.UUID | None
+    extra: dict = {}  # ingestion stats/errors — never secrets
+
+
+class ChunkResponse(BaseModel):
+    """Embedding intentionally excluded — not useful to clients."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    version_id: uuid.UUID
+    chunk_index: int
+    content: str
+    page_number: int | None
+    section_title: str | None
+    token_count: int | None
+    content_hash: str | None
+    created_at: datetime
 
 
 class DocumentDetailResponse(DocumentResponse):

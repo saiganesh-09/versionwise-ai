@@ -60,3 +60,24 @@ def can_manage(session: Session, user: User, document: Document) -> bool:
         )
     ).scalar_one_or_none()
     return grant is not None
+
+
+def can_write(session: Session, user: User, document: Document) -> bool:
+    """Owner, admin, or explicit 'write'/'manage' grant — required to add
+    versions or reingest."""
+    if user.role == UserRole.admin or document.owner_id == user.id:
+        return True
+    grant = session.execute(
+        select(DocumentPermissionGrant).where(
+            DocumentPermissionGrant.document_id == document.id,
+            DocumentPermissionGrant.user_id == user.id,
+            DocumentPermissionGrant.permission.in_(
+                [DocumentPermission.write, DocumentPermission.manage]
+            ),
+        )
+    ).scalar_one_or_none()
+    return grant is not None
+
+
+def get_document(session: Session, document_id: uuid.UUID) -> Document | None:
+    return session.get(Document, document_id)
