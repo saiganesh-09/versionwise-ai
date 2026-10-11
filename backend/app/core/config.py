@@ -67,6 +67,11 @@ class Settings(BaseSettings):
     # --- Retrieval defaults ---
     retrieval_top_k: int = 8
     retrieval_similarity_threshold: float = 0.15  # cosine floor; below = noise
+
+    # --- Rate limiting (per-IP sliding window) ---
+    rate_limit_per_minute: int = 300
+    auth_rate_limit_per_minute: int = 10
+    chat_rate_limit_per_minute: int = 30
     chunk_size_tokens: int = 512
     chunk_overlap_tokens: int = 64
 

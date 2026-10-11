@@ -28,6 +28,13 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    from app.core.rate_limit import (
+        RateLimitMiddleware,
+        SecurityHeadersMiddleware,
+    )
+
+    app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(RateLimitMiddleware)
 
     register_exception_handlers(app)
     app.include_router(api_v1_router)

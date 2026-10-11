@@ -38,7 +38,7 @@ something) from **effective time** (when a rule was actually in force).
 - [x] **Phase 9** — Full frontend (landing, dashboard, library, doc detail, chat, compare, conflicts, settings)
 - [x] **Phase 10** — API hardening (versioned routes, consistent errors, pagination, no N+1)
 - [x] **Phase 11** — Test suite + eval corpus + metrics (version-selection accuracy, Recall@k, citation correctness) — 99 tests, `eval/corpus`, `run_eval.py`, all metrics 1.0; see docs/EVALUATION.md
-- [ ] **Phase 12** — Security & reliability (rate limits, prompt-injection defenses, audit)
+- [x] **Phase 12** — Security & reliability (rate limits, prompt-injection defenses, audit)
 - [ ] **Phase 13** — Deployment prep (Vercel + Python host + managed Postgres + object storage)
 - [ ] **Phase 14** — README/portfolio polish, screenshots, eval report
 

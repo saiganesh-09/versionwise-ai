@@ -10,6 +10,10 @@ os.environ.setdefault("OBJECT_STORAGE_PROVIDER", "local")
 os.environ.setdefault("LOCAL_STORAGE_DIR", tempfile.mkdtemp(prefix="vw-test-storage-"))
 os.environ.setdefault("EMBEDDING_PROVIDER", "mock")
 os.environ.setdefault("LLM_PROVIDER", "mock")
+# Tests issue hundreds of requests — never trip the limiter on purpose.
+os.environ.setdefault("RATE_LIMIT_PER_MINUTE", "100000")
+os.environ.setdefault("AUTH_RATE_LIMIT_PER_MINUTE", "100000")
+os.environ.setdefault("CHAT_RATE_LIMIT_PER_MINUTE", "100000")
 
 import pytest
 from fastapi.testclient import TestClient

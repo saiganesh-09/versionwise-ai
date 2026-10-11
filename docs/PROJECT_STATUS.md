@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 12 — Security & reliability (up next)
+## Current phase: 13 — Deployment prep (up next)
 
 ## Completed
 
@@ -59,6 +59,11 @@ Updated after each phase. Last updated: 2026-10-10.
       chunk→doc visibility for conflicts (kills N+1); selectinload for
       session messages+citations; dashboard counts via ids-only queries;
       error envelope audit (AppError/validation/500 all consistent).
+- [x] Phase 12 — Security: sliding-window rate limiter (auth 10/min, chat
+      30/min, general 300/min, per-IP, Retry-After), security headers
+      (nosniff/DENY/no-referrer + no-store on auth/chat), CORS scoped to
+      frontend origin, pip-audit clean (pip 26.x), injection-as-data
+      verified. 105 tests.
 
 ## Test results
 
