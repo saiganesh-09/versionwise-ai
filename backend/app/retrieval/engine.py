@@ -273,9 +273,11 @@ def answer_question(
     seen = set()
     unique_evidence = [e for e in all_evidence if not (e.chunk_id in seen or seen.add(e.chunk_id))]
 
-    # Unresolved conflicts touching retrieved evidence — surface, never hide.
+    # Unresolved *contradictions* touching retrieved evidence — surface,
+    # never hide. `updated_by_newer_version` and other informational
+    # findings are legitimate version history, not warnings.
     if unique_evidence:
-        from app.models import Conflict, ConflictStatus
+        from app.models import Conflict, ConflictStatus, ConflictType
 
         ev_ids = [uuid.UUID(e.chunk_id) for e in unique_evidence]
         open_conflicts = session.execute(
@@ -283,16 +285,32 @@ def answer_question(
                 Conflict.status.in_(
                     [ConflictStatus.potential, ConflictStatus.confirmed]
                 ),
+                Conflict.conflict_type.in_(
+                    [ConflictType.contradictory, ConflictType.context_dependent]
+                ),
                 or_(
                     Conflict.chunk_a_id.in_(ev_ids),
                     Conflict.chunk_b_id.in_(ev_ids),
                 ),
             )
         ).scalars().all()
+        seen_explanations: set[str] = set()
+        shown = 0
         for cf in open_conflicts:
+            if cf.explanation in seen_explanations:
+                continue
+            seen_explanations.add(cf.explanation)
+            if shown < 3:
+                warnings.append(
+                    f"Unresolved {cf.conflict_type.value} conflict: "
+                    f"{cf.explanation[:200]}"
+                )
+            shown += 1
+        hidden = shown - min(shown, 3)
+        if hidden:
             warnings.append(
-                f"Unresolved {cf.conflict_type.value} conflict ({cf.id}): "
-                f"{cf.explanation[:200]}"
+                f"+ {hidden} more open conflict(s) touching this evidence "
+                "— review on the Conflicts page."
             )
 
     intent_dict = {
