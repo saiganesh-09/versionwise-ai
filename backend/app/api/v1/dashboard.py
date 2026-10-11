@@ -31,9 +31,8 @@ def dashboard_stats(
 ) -> dict:
     """Permission-scoped counts: regular users see their visible docs only,
     admins see the whole tenant."""
-    visible_ids = [
-        d.id for d in doc_repo.visible_documents(session, current, limit=10000)
-    ]
+    # Ids only — never materialize document objects just to count children.
+    visible_ids = doc_repo.visible_document_ids(session, current)
     docs = session.execute(
         select(func.count()).select_from(Document).where(Document.id.in_(visible_ids))
     ).scalar_one()

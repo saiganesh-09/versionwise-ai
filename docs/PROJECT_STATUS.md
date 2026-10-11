@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 10 — API hardening (up next)
+## Current phase: 12 — Security & reliability (up next)
 
 ## Completed
 
@@ -54,6 +54,11 @@ Updated after each phase. Last updated: 2026-10-10.
       effective range + page, conflict warnings), /conflicts (detect +
       expand-evidence + confirm/dismiss/resolve), /settings (public config).
       Auth shell w/ guard + Suspense boundary for Next 16 Cache Components.
+- [x] Phase 10 — API hardening: limit/offset on every list endpoint
+      (documents, versions, chunks, conflicts, sessions); batched
+      chunk→doc visibility for conflicts (kills N+1); selectinload for
+      session messages+citations; dashboard counts via ids-only queries;
+      error envelope audit (AppError/validation/500 all consistent).
 
 ## Test results
 

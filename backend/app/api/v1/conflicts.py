@@ -89,17 +89,69 @@ def run_detection(
     return DetectResponse(candidates_evaluated=len(findings), findings=findings)
 
 
+def _chunk_doc_map(
+    session: Session, rows: list[Conflict]
+) -> dict[uuid.UUID, uuid.UUID]:
+    """One query resolving chunk_id → document_id for a whole page."""
+    chunk_ids = {
+        cid for c in rows for cid in (c.chunk_a_id, c.chunk_b_id) if cid
+    }
+    if not chunk_ids:
+        return {}
+    return dict(
+        session.execute(
+            select(Chunk.id, DocumentVersion.document_id)
+            .join(DocumentVersion, Chunk.version_id == DocumentVersion.id)
+            .where(Chunk.id.in_(chunk_ids))
+        ).all()
+    )
+
+
 @router.get("/conflicts", response_model=list[ConflictOut])
 def list_conflicts(
     current: CurrentUser,
     session: Session = Depends(get_session),
     status: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
 ) -> list[Conflict]:
-    stmt = select(Conflict).order_by(Conflict.updated_at.desc())
+    stmt = (
+        select(Conflict)
+        .order_by(Conflict.updated_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
     if status:
         stmt = stmt.where(Conflict.status == status)
     rows = list(session.execute(stmt).scalars())
-    return [c for c in rows if _conflict_visible(session, current, c)]
+    if current.role == UserRole.admin or not rows:
+        return rows
+
+    # Batched visibility — no per-row session.get.
+    chunk_to_doc = _chunk_doc_map(session, rows)
+    doc_visibility: dict[uuid.UUID, bool] = {}
+
+    def docs_of(c: Conflict) -> set[uuid.UUID]:
+        docs = {c.document_id} if c.document_id else set()
+        docs.update(
+            d
+            for d in (
+                chunk_to_doc.get(c.chunk_a_id), chunk_to_doc.get(c.chunk_b_id)
+            )
+            if d
+        )
+        return docs
+
+    def visible(c: Conflict) -> bool:
+        docs = docs_of(c)
+        return bool(docs) and all(
+            doc_visibility.setdefault(
+                d, doc_repo.get_visible(session, current, d) is not None
+            )
+            for d in docs
+        )
+
+    return [c for c in rows if visible(c)]
 
 
 @router.get("/conflicts/{conflict_id}", response_model=ConflictOut)

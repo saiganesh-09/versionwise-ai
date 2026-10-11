@@ -28,6 +28,13 @@ def _visibility_filter(user: User):
     return or_(Document.owner_id == user.id, Document.id.in_(granted))
 
 
+def visible_document_ids(session: Session, user: User) -> list[uuid.UUID]:
+    """Just the ids — for count/subquery use, no object materialization."""
+    return list(
+        session.execute(select(Document.id).where(_visibility_filter(user))).scalars()
+    )
+
+
 def visible_documents(
     session: Session, user: User, *, limit: int = 50, offset: int = 0
 ) -> list[Document]:

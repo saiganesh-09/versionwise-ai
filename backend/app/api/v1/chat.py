@@ -2,9 +2,9 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.errors import NotFoundError
 from app.core.security import CurrentUser, ForbiddenError
@@ -88,13 +88,18 @@ def ask(
 
 @router.get("/sessions", response_model=list[SessionOut])
 def list_sessions(
-    current: CurrentUser, session: Session = Depends(get_session)
+    current: CurrentUser,
+    session: Session = Depends(get_session),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
 ) -> list[ChatSession]:
     return list(
         session.execute(
             select(ChatSession)
             .where(ChatSession.user_id == current.id)
             .order_by(ChatSession.updated_at.desc())
+            .limit(limit)
+            .offset(offset)
         ).scalars()
     )
 
@@ -105,7 +110,16 @@ def get_session_detail(
     current: CurrentUser,
     session: Session = Depends(get_session),
 ) -> ChatSession:
-    chat_session = session.get(ChatSession, session_id)
+    # Eager-load messages + their citations in two queries — no N+1.
+    chat_session = session.execute(
+        select(ChatSession)
+        .options(
+            selectinload(ChatSession.messages).selectinload(
+                ChatMessage.citations
+            )
+        )
+        .where(ChatSession.id == session_id)
+    ).scalar_one_or_none()
     if chat_session is None:
         raise NotFoundError("Chat session not found.")
     if chat_session.user_id != current.id:

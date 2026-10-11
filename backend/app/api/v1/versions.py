@@ -6,7 +6,15 @@ import uuid
 from datetime import date
 from pathlib import PurePosixPath
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    Query,
+    UploadFile,
+    status,
+)
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -153,6 +161,8 @@ def list_versions(
     document_id: uuid.UUID,
     current: CurrentUser,
     session: Session = Depends(get_session),
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
 ) -> list[DocumentVersion]:
     if doc_repo.get_visible(session, current, document_id) is None:
         raise NotFoundError("Document not found.")
@@ -161,6 +171,8 @@ def list_versions(
             select(DocumentVersion)
             .where(DocumentVersion.document_id == document_id)
             .order_by(DocumentVersion.version_number)
+            .limit(limit)
+            .offset(offset)
         ).scalars()
     )
 
@@ -182,6 +194,8 @@ def list_version_chunks(
     version_id: uuid.UUID,
     current: CurrentUser,
     session: Session = Depends(get_session),
+    limit: int = Query(default=200, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0),
 ) -> list:
     version = session.get(DocumentVersion, version_id)
     if version is None or doc_repo.get_visible(session, current, version.document_id) is None:
@@ -190,7 +204,11 @@ def list_version_chunks(
 
     return list(
         session.execute(
-            select(Chunk).where(Chunk.version_id == version_id).order_by(Chunk.chunk_index)
+            select(Chunk)
+            .where(Chunk.version_id == version_id)
+            .order_by(Chunk.chunk_index)
+            .limit(limit)
+            .offset(offset)
         ).scalars()
     )
 
