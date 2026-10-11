@@ -33,7 +33,7 @@ something) from **effective time** (when a rule was actually in force).
 - [x] **Phase 4** — Ingestion pipeline (PDF/DOCX/TXT, page metadata, chunking, batched embeddings, status tracking)
 - [x] **Phase 5** — Version management APIs + UI (revisions, approval, supersession, dedupe by hash)
 - [x] **Phase 6** — Temporal retrieval engine (intent parsing → eligibility filter → vector search → evidence → grounded answer → citation validation)
-- [ ] **Phase 7** — Conflict detection engine + human review workflow
+- [x] **Phase 7** — Conflict detection engine + human review workflow
 - [ ] **Phase 8** — Version comparison (deterministic diff + LLM summary)
 - [ ] **Phase 9** — Full frontend (landing, dashboard, library, doc detail, chat, compare, conflicts, settings)
 - [ ] **Phase 10** — API hardening (versioned routes, consistent errors, pagination, no N+1)

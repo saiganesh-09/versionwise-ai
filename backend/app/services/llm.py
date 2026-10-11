@@ -59,6 +59,8 @@ class MockLLM:
 
     def complete(self, system: str, user: str) -> str:
         payload = json.loads(user)
+        if payload.get("task") == "conflict_check":
+            return self._conflict_check(payload)
         evidence = payload.get("evidence", [])
         question = payload.get("question", "")
         if not evidence:
@@ -87,6 +89,32 @@ class MockLLM:
                 "warnings": [],
                 "question_echo": question[:80],
             }
+        )
+
+    @staticmethod
+    def _conflict_check(payload: dict) -> str:
+        """Deterministic verdict mirroring the real classifier's contract."""
+        import re
+
+        nums = re.compile(r"\d+(?:\.\d+)?")
+        a, b = payload["evidence_a"], payload["evidence_b"]
+        na, nb = set(nums.findall(a)), set(nums.findall(b))
+        if a.strip().lower() == b.strip().lower() or na == nb:
+            verdict, conf, why = "consistent", 0.7, "No differing assertions."
+        elif payload.get("same_document") and not payload.get("intervals_overlap"):
+            verdict, conf, why = (
+                "updated_by_newer_version", 0.9,
+                "Newer version changes the value for a later period.",
+            )
+        elif payload.get("intervals_overlap"):
+            verdict, conf, why = (
+                "contradictory", 0.85,
+                f"Overlapping periods assert different values ({sorted(na)} vs {sorted(nb)}).",
+            )
+        else:
+            verdict, conf, why = "context_dependent", 0.4, "Differences without overlap."
+        return json.dumps(
+            {"verdict": verdict, "confidence": conf, "explanation": why}
         )
 
 

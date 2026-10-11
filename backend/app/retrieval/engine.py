@@ -267,6 +267,28 @@ def answer_question(
     seen = set()
     unique_evidence = [e for e in all_evidence if not (e.chunk_id in seen or seen.add(e.chunk_id))]
 
+    # Unresolved conflicts touching retrieved evidence — surface, never hide.
+    if unique_evidence:
+        from app.models import Conflict, ConflictStatus
+
+        ev_ids = [uuid.UUID(e.chunk_id) for e in unique_evidence]
+        open_conflicts = session.execute(
+            select(Conflict).where(
+                Conflict.status.in_(
+                    [ConflictStatus.potential, ConflictStatus.confirmed]
+                ),
+                or_(
+                    Conflict.chunk_a_id.in_(ev_ids),
+                    Conflict.chunk_b_id.in_(ev_ids),
+                ),
+            )
+        ).scalars().all()
+        for cf in open_conflicts:
+            warnings.append(
+                f"Unresolved {cf.conflict_type.value} conflict ({cf.id}): "
+                f"{cf.explanation[:200]}"
+            )
+
     intent_dict = {
         "kind": intent.kind,
         "as_of": intent.as_of.isoformat() if intent.as_of else None,

@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 7 — Conflict detection + version comparison (up next)
+## Current phase: 8 — Evaluation + metrics (up next)
 
 ## Completed
 
@@ -35,6 +35,11 @@ Updated after each phase. Last updated: 2026-10-10.
       grounded JSON contract, citation validation, /chat + session
       persistence. Full spec eval corpus (12→15→20 days, boundary dates,
       future/unapproved exclusion, overlap ambiguity) passes offline.
+- [x] Phase 7 — Conflict detection (cross-doc contradictions vs same-doc
+      legitimate updates, interval-overlap aware, canonical-pair dedupe,
+      no reopen of dismissed/resolved), human review workflow
+      (confirm/dismiss/resolve + notes + audit), chat warnings on evidence
+      touching open conflicts, /compare paragraph diff endpoint.
 
 ## Test results
 
@@ -59,6 +64,7 @@ Updated after each phase. Last updated: 2026-10-10.
 | Live ingest → RustFS | ✅ pass | upload→version→chunks→object stored in bucket |
 | Backend `pytest` (Phase 5) | ✅ 57/57 total | approve/reject/supersede rules, perms, audit, lineage |
 | Backend `pytest` (Phase 6) | ✅ 78/78 total | intent parsing, temporal correctness, boundaries, exclusions, ambiguity, citations, isolation, sessions |
+| Backend `pytest` (Phase 7) | ✅ 90/90 total | contradiction vs update classification, dedupe, review workflow, chat warnings, compare diff, perms |
 
 ## Known limitations
 
