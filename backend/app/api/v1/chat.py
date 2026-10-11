@@ -28,12 +28,25 @@ def ask(
     session: Session = Depends(get_session),
 ) -> ChatResponse:
     # Resolve or create the session — always owned by the caller.
+    context: str | None = None
     if body.session_id is not None:
         chat_session = session.get(ChatSession, body.session_id)
         if chat_session is None:
             raise NotFoundError("Chat session not found.")
         if chat_session.user_id != current.id:
             raise ForbiddenError("This chat session belongs to another user.")
+        # Prior user turns give the retriever context for pronoun follow-ups.
+        prior = session.execute(
+            select(ChatMessage)
+            .where(
+                ChatMessage.session_id == chat_session.id,
+                ChatMessage.role == MessageRole.user,
+            )
+            .order_by(ChatMessage.created_at.desc())
+            .limit(2)
+        ).scalars().all()
+        if prior:
+            context = " ".join(m.content for m in reversed(prior))
     else:
         chat_session = ChatSession(
             user_id=current.id, title=body.question[:80]
@@ -47,6 +60,7 @@ def ask(
         body.question,
         as_of=body.as_of_date,
         document_id=body.document_id,
+        context=context,
     )
 
     # Persist both sides of the exchange + auditable citation links.

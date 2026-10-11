@@ -105,6 +105,24 @@ def ask(client: TestClient, headers, question: str, **kw):
     return resp.json()
 
 
+def test_follow_up_pronoun_uses_session_context(
+    client: TestClient, leave_corpus
+) -> None:
+    """'What was it in Feb 2025?' alone carries no topical tokens — the prior
+    turn's content must resolve the referent via session context."""
+    headers, _ = leave_corpus
+    first = ask(client, headers, "What is the current annual leave allowance?")
+    assert first["status"] == "answered"
+    follow = ask(
+        client, headers,
+        "What was it in February 2025?",
+        session_id=first["session_id"],
+    )
+    assert follow["status"] == "answered"
+    vnums = {c["version_number"] for c in follow["citations"]}
+    assert 2 in vnums  # the 15-day version covering Feb 2025
+
+
 # --- retrieval tests ---------------------------------------------------------
 
 

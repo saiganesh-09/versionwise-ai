@@ -225,6 +225,7 @@ def answer_question(
     *,
     as_of: date | None = None,
     document_id: uuid.UUID | None = None,
+    context: str | None = None,
     settings: Settings | None = None,
     embedder: EmbeddingProvider | None = None,
     llm: LLMProvider | None = None,
@@ -232,6 +233,11 @@ def answer_question(
     settings = settings or get_settings()
     embedder = embedder or get_embedding_provider(settings)
     llm = llm or get_llm_provider(settings)
+
+    # Conversational retrieval: prepend prior-turn context to the search
+    # query so follow-ups ("what was it in Feb 2025?") resolve the referent.
+    # Intent is still parsed from the raw question — the date belongs there.
+    search_query = f"{context} {question}" if context else question
 
     intent = parse_temporal_intent(question)
     if as_of is not None:  # explicit override wins over parsed intent
@@ -256,7 +262,7 @@ def answer_question(
         rows = search_chunks(
             session,
             embedder,
-            question,
+            search_query,
             [v.id for v in versions],
             top_k=settings.retrieval_top_k,
             min_similarity=settings.retrieval_similarity_threshold,
@@ -315,7 +321,13 @@ def answer_question(
 
     raw = llm.complete(
         _SYSTEM_PROMPT,
-        json.dumps({"question": question, "evidence": [asdict(e) for e in unique_evidence]}),
+        json.dumps(
+            {
+                "question": question,
+                "conversation_context": context,
+                "evidence": [asdict(e) for e in unique_evidence],
+            }
+        ),
     )
     try:
         parsed = json.loads(raw)
