@@ -36,7 +36,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
     throw new Error(body?.error.message ?? `Request failed (${res.status})`);
   }
-  return (await res.json()) as T;
+  // Some success responses have no body (e.g. logout) — don't hard-fail on it.
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export function getHealth(): Promise<HealthResponse> {
