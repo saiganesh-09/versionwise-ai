@@ -1,0 +1,102 @@
+name: versionwise-prod
+
+# Self-contained production profile: app + postgres + object storage in one
+# stack. For managed deployments (Vercel + Render + RDS + S3) use the env
+# matrix in docs/DEPLOYMENT.md instead — only the two app services then.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: versionwise-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-versionwise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-versionwise}
+    volumes:
+      - pgdata-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-versionwise}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # No host port published — only the backend reaches it on the network.
+
+  storage:
+    image: rustfs/rustfs:latest
+    container_name: versionwise-storage-prod
+    restart: unless-stopped
+    command: rustfs --address :9000 --console-enable /data
+    environment:
+      RUSTFS_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY:?set in .env}
+      RUSTFS_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY:?set in .env}
+    volumes:
+      - rustfs-data-prod:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  storage-init:
+    image: amazon/aws-cli:latest
+    depends_on:
+      storage:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "aws s3 mb s3://${OBJECT_STORAGE_BUCKET:-versionwise-documents}
+             --endpoint-url http://storage:9000 || true"
+    environment:
+      AWS_ACCESS_KEY_ID: ${OBJECT_STORAGE_ACCESS_KEY:?set in .env}
+      AWS_SECRET_ACCESS_KEY: ${OBJECT_STORAGE_SECRET_KEY:?set in .env}
+
+  backend:
+    build: ./backend
+    container_name: versionwise-backend-prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      storage-init:
+        condition: service_completed_successfully
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-versionwise}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-versionwise}
+      SECRET_KEY: ${SECRET_KEY:?set in .env — 32+ bytes}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+      OBJECT_STORAGE_PROVIDER: s3
+      OBJECT_STORAGE_ENDPOINT: http://storage:9000
+      OBJECT_STORAGE_BUCKET: ${OBJECT_STORAGE_BUCKET:-versionwise-documents}
+      OBJECT_STORAGE_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY}
+      OBJECT_STORAGE_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      WORKERS: ${WORKERS:-2}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready')\" || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://localhost:8000}
+    container_name: versionwise-frontend-prod
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+volumes:
+  pgdata-prod:
+  rustfs-data-prod:

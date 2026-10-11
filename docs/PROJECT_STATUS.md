@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 13 — Deployment prep (up next)
+## Current phase: 14 — README/portfolio polish (up next)
 
 ## Completed
 
@@ -64,6 +64,11 @@ Updated after each phase. Last updated: 2026-10-10.
       (nosniff/DENY/no-referrer + no-store on auth/chat), CORS scoped to
       frontend origin, pip-audit clean (pip 26.x), injection-as-data
       verified. 105 tests.
+- [x] Phase 13 — Deployment: backend Dockerfile (multi-stage, migrations
+      on start, verified live in container → ready probe ok), frontend
+      Dockerfile (Next standalone), docker-compose.prod.yml (app + pg +
+      RustFS self-contained), docs/DEPLOYMENT.md (env matrix, managed
+      path, prod checklist).
 
 ## Test results
 
