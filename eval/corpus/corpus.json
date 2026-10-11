@@ -1,0 +1,100 @@
+{
+  "name": "versionwise-eval-corpus",
+  "description": "Sanitized fictional enterprise policy corpus for temporal-retrieval evaluation. All documents are synthetic — no real company data.",
+  "documents": [
+    {
+      "title": "Employee Leave Policy",
+      "document_type": "policy",
+      "versions": [
+        {"file": "leave_v1.txt", "effective_from": "2024-01-01", "effective_until": "2025-01-01"},
+        {"file": "leave_v2.txt", "effective_from": "2025-01-01", "effective_until": "2026-04-01"},
+        {"file": "leave_v3.txt", "effective_from": "2026-04-01", "effective_until": null}
+      ]
+    },
+    {
+      "title": "Travel Expense Policy",
+      "document_type": "policy",
+      "versions": [
+        {"file": "travel_v1.txt", "effective_from": "2024-01-01", "effective_until": "2026-01-01"},
+        {"file": "travel_v2.txt", "effective_from": "2026-01-01", "effective_until": null}
+      ]
+    },
+    {
+      "title": "Security Standard",
+      "document_type": "standard",
+      "versions": [
+        {"file": "security_v1.txt", "effective_from": "2024-01-01", "effective_until": "2026-01-01"},
+        {"file": "security_v2.txt", "effective_from": "2026-01-01", "effective_until": null}
+      ]
+    },
+    {
+      "title": "Manager Handbook",
+      "document_type": "handbook",
+      "versions": [
+        {"file": "handbook_v1.txt", "effective_from": "2024-01-01", "effective_until": null}
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "leave-current",
+      "question": "What is the current annual leave allowance?",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "version_numbers": [3], "answer_terms": ["20"]}
+    },
+    {
+      "id": "leave-feb-2025",
+      "question": "What was the annual leave allowance in February 2025?",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "version_numbers": [2], "answer_terms": ["15"]}
+    },
+    {
+      "id": "leave-2024",
+      "question": "What was the annual leave allowance in 2024?",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "version_numbers": [1], "answer_terms": ["12"]}
+    },
+    {
+      "id": "leave-boundary-before",
+      "question": "What annual leave entitlement applied on 2026-03-31?",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "version_numbers": [2], "answer_terms": ["15"]}
+    },
+    {
+      "id": "leave-boundary-after",
+      "question": "What annual leave entitlement applied on 2026-04-01?",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "version_numbers": [3], "answer_terms": ["20"]}
+    },
+    {
+      "id": "leave-compare",
+      "question": "What changed between 2024 and 2026 for annual leave?",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "evidence_versions": [1, 3]}
+    },
+    {
+      "id": "leave-compare-strict",
+      "question": "Compare the 2024 annual leave policy with the current policy.",
+      "expect": {"status": "answered", "document": "Employee Leave Policy", "evidence_versions": [1, 3]}
+    },
+    {
+      "id": "travel-current",
+      "question": "What is the daily meal reimbursement limit?",
+      "expect": {"status": "answered", "document": "Travel Expense Policy", "version_numbers": [2], "answer_terms": ["75"]}
+    },
+    {
+      "id": "travel-2025",
+      "question": "What was the meal reimbursement in 2025?",
+      "expect": {"status": "answered", "document": "Travel Expense Policy", "version_numbers": [1], "answer_terms": ["50"]}
+    },
+    {
+      "id": "security-current",
+      "question": "How often must passwords be rotated?",
+      "expect": {"status": "answered", "document": "Security Standard", "version_numbers": [2], "answer_terms": ["180"]}
+    },
+    {
+      "id": "insufficient-unknown-topic",
+      "question": "What are the bereavement arrangements for the Helsinki office?",
+      "expect": {"status": "insufficient_evidence"}
+    },
+    {
+      "id": "conflict-leave-vs-handbook",
+      "question": "How many days of annual leave does the company grant?",
+      "expect": {"status": "answered", "conflict_warning_expected": true}
+    }
+  ]
+}

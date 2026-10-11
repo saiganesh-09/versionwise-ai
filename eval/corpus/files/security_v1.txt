@@ -1,0 +1,5 @@
+All employees must use multi-factor authentication on company systems.
+
+Passwords must be at least 12 characters and rotated every 90 days.
+
+Laptops must use full-disk encryption.

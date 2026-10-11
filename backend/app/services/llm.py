@@ -72,20 +72,25 @@ class MockLLM:
                     "warnings": ["no_evidence"],
                 }
             )
-        top = evidence[0]
-        interval = (
-            f"effective {top['effective_from']}"
-            + (f" - {top['effective_until']}" if top["effective_until"] else " - present")
-        )
-        snippet = top["content"][:280].strip()
-        answer = (
-            f"According to '{top['document_title']}' (version "
-            f"{top['version_number']}, {interval}): {snippet}"
-        )
+        # Quote up to the top-3 passages — closer to how a real model uses
+        # the whole evidence set than a single-snippet echo.
+        parts: list[str] = []
+        cited: list[str] = []
+        for e in evidence[:3]:
+            interval = (
+                f"effective {e['effective_from']}"
+                + (f" - {e['effective_until']}" if e["effective_until"] else " - present")
+            )
+            parts.append(
+                f"'{e['document_title']}' (v{e['version_number']}, {interval})"
+                f" states: {e['content'][:220].strip()}"
+            )
+            cited.append(e["chunk_id"])
+        answer = "Based on the retrieved evidence — " + " | ".join(parts)
         return json.dumps(
             {
                 "answer": answer,
-                "citations": [top["chunk_id"]],
+                "citations": cited,
                 "warnings": [],
                 "question_echo": question[:80],
             }

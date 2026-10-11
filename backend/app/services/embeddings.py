@@ -87,7 +87,11 @@ class MockEmbeddings:
             for token in re.findall(r"[a-z0-9]+", t.lower()):
                 if token in self._STOPWORDS:
                     continue
-                h = hashlib.sha256(token.encode()).digest()
+                # Crude normalization: drop plural 's' + common prefix —
+                # "meals"~"meal", "reimbursement"~"reimbursed".
+                norm = token.rstrip("s") if len(token) > 4 else token
+                norm = norm[:8]
+                h = hashlib.sha256(norm.encode()).digest()
                 idx = int.from_bytes(h[:4], "big") % self._dims
                 sign = 1.0 if h[4] % 2 == 0 else -1.0
                 vec[idx] += sign

@@ -66,7 +66,7 @@ class Settings(BaseSettings):
 
     # --- Retrieval defaults ---
     retrieval_top_k: int = 8
-    retrieval_similarity_threshold: float = 0.0
+    retrieval_similarity_threshold: float = 0.15  # cosine floor; below = noise
     chunk_size_tokens: int = 512
     chunk_overlap_tokens: int = 64
 

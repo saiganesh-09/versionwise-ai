@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 8 — Evaluation + metrics (up next)
+## Current phase: 9 — Full frontend (up next)
 
 ## Completed
 
@@ -40,6 +40,12 @@ Updated after each phase. Last updated: 2026-10-10.
       no reopen of dismissed/resolved), human review workflow
       (confirm/dismiss/resolve + notes + audit), chat warnings on evidence
       touching open conflicts, /compare paragraph diff endpoint.
+- [x] Phase 8+11 — Eval harness: eval/corpus (4 docs, 8 versions, 12 cases),
+      app/eval/evaluator + scripts/run_eval.py (dedicated versionwise_eval
+      DB, in-process app), dashboard stats + /eval/latest endpoints.
+      Real run: all metrics 1.0 (see docs/EVALUATION.md). Also set a real
+      RETRIEVAL_SIMILARITY_THRESHOLD floor (0.15) + compare-with-one-date
+      intent parsing.
 
 ## Test results
 
@@ -65,6 +71,8 @@ Updated after each phase. Last updated: 2026-10-10.
 | Backend `pytest` (Phase 5) | ✅ 57/57 total | approve/reject/supersede rules, perms, audit, lineage |
 | Backend `pytest` (Phase 6) | ✅ 78/78 total | intent parsing, temporal correctness, boundaries, exclusions, ambiguity, citations, isolation, sessions |
 | Backend `pytest` (Phase 7) | ✅ 90/90 total | contradiction vs update classification, dedupe, review workflow, chat warnings, compare diff, perms |
+| Backend `pytest` (Phase 8) | ✅ 99/99 total | eval harness, dashboard, all metric gates |
+| `scripts/run_eval.py` live | ✅ 1.0 all metrics | real eval DB, real pipeline, see docs/EVALUATION.md |
 
 ## Known limitations
 

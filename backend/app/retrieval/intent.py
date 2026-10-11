@@ -73,17 +73,30 @@ def parse_temporal_intent(question: str, *, today: date | None = None) -> Tempor
             resolved_by="explicit_range",
         )
     if _RE_COMPARE.search(q):
-        # "compare previous and current" — previous period is ambiguous without
-        # a date; flag it so the client can ask, but provide a usable default:
-        # today vs one year ago.
-        if not (_RE_FULL_DATE.search(q) or _RE_MONTH_YEAR.search(q) or _RE_YEAR.search(q)):
+        # "Compare the 2024 policy with the current one" — one date given:
+        # compare that representative point against today.
+        if m := _RE_YEAR.search(q):
             return TemporalIntent(
                 kind="compare",
-                compare_a=date(today.year - 1, today.month, min(today.day, 28)),
+                compare_a=_year_point(int(m.group(0))),
                 compare_b=today,
-                ambiguous=True,
-                resolved_by="default_previous_year",
+                resolved_by="compare_vs_current",
             )
+        if m := _RE_MONTH_YEAR.search(q):
+            return TemporalIntent(
+                kind="compare",
+                compare_a=date(int(m.group(2)), _MONTHS[m.group(1).lower()], 15),
+                compare_b=today,
+                resolved_by="compare_vs_current",
+            )
+        # No date at all — previous period is ambiguous; flag it.
+        return TemporalIntent(
+            kind="compare",
+            compare_a=date(today.year - 1, today.month, min(today.day, 28)),
+            compare_b=today,
+            ambiguous=True,
+            resolved_by="default_previous_year",
+        )
 
     # Explicit full date: "on March 15, 2026" / "March 15, 2026".
     if m := _RE_FULL_DATE.search(q):

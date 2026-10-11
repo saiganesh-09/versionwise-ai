@@ -38,3 +38,7 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Local object storage + eval artifacts
+.local-storage/
+eval/results/
