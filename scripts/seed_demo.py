@@ -34,18 +34,31 @@ DEMO_PASSWORD = "demo-password-123"
 
 
 def main() -> int:
-    from alembic import command
-    from alembic.config import Config
-    from fastapi.testclient import TestClient
+    import argparse
 
     from app.eval.evaluator import load_corpus, run_case, seed_corpus
-    from app.main import create_app
 
-    cfg = Config(str(BACKEND / "alembic.ini"))
-    cfg.set_main_option("script_location", str(BACKEND / "migrations"))
-    command.upgrade(cfg, "head")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--url", help="Remote backend base URL (seeds via HTTP)")
+    args = parser.parse_args()
 
-    client = TestClient(create_app())
+    if args.url:
+        import httpx
+
+        client = httpx.Client(base_url=args.url.rstrip("/"), timeout=60)
+        remote = True
+    else:
+        from alembic import command
+        from alembic.config import Config
+        from fastapi.testclient import TestClient
+
+        from app.main import create_app
+
+        cfg = Config(str(BACKEND / "alembic.ini"))
+        cfg.set_main_option("script_location", str(BACKEND / "migrations"))
+        command.upgrade(cfg, "head")
+        client = TestClient(create_app())
+        remote = False
 
     r = client.post(
         "/api/v1/auth/register",
@@ -62,10 +75,9 @@ def main() -> int:
         "/api/v1/auth/login",
         json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD},
     )
-    if login.status_code != 200 and r.status_code == 409:
+    if login.status_code != 200 and r.status_code == 409 and not remote:
         # Stale demo account with a different password — reset via ORM.
         from sqlalchemy import select
-        from sqlalchemy.orm import Session
 
         from app.core.security import hash_password
         from app.db.session import get_session as _gs
@@ -81,6 +93,9 @@ def main() -> int:
             "/api/v1/auth/login",
             json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD},
         )
+    if login.status_code != 200:
+        print(f"login failed: {login.status_code} {login.text}")
+        return 1
     token = login.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 

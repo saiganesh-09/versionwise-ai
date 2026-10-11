@@ -75,6 +75,14 @@ class Settings(BaseSettings):
     chunk_size_tokens: int = 512
     chunk_overlap_tokens: int = 64
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _normalize_pg_scheme(cls, v):
+        # Hosts like Render hand back plain "postgresql://" — we run psycopg3.
+        if isinstance(v, str) and v.startswith("postgresql://"):
+            return "postgresql+psycopg://" + v[len("postgresql://"):]
+        return v
+
     @field_validator("frontend_origin")
     @classmethod
     def _strip_trailing_slash(cls, v: str) -> str:

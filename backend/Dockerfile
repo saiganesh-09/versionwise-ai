@@ -27,4 +27,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
 
 # Migrations run at container start — idempotent, safe for rolling deploys
 # only if the migration itself is backward-compatible.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${WORKERS:-2}"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers ${WORKERS:-2}"]

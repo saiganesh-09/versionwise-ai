@@ -1,0 +1,43 @@
+# Render Blueprint — one-click backend + Postgres deploy.
+# render.com → New + → Blueprint → connect this repo → Apply.
+# Free tier: web service spins down when idle (cold start ~30s),
+# free Postgres lasts 90 days. Upgrade for always-on.
+services:
+  - type: web
+    name: versionwise-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health/ready
+    plan: free
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: versionwise-db
+          property: connectionString
+      - key: FRONTEND_ORIGIN
+        value: https://versionwise-ai.vercel.app
+        sync: false
+      - key: OBJECT_STORAGE_PROVIDER
+        value: local
+      - key: LOCAL_STORAGE_DIR
+        value: /data/storage
+      - key: EMBEDDING_PROVIDER
+        value: mock
+      - key: LLM_PROVIDER
+        value: mock
+      - key: WORKERS
+        value: "1"
+      # Swap mock for real providers by adding:
+      # - key: EMBEDDING_API_KEY / LLM_API_KEY (from your dashboard)
+      # Note: free plan has no persistent disk — uploads are ephemeral.
+      # Add a 1GB disk at /data on a paid plan for durable object storage.
+
+databases:
+  - name: versionwise-db
+    plan: free
+    postgresMajorVersion: "16"
