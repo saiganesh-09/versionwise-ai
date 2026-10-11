@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     llm_api_key: str | None = None
     llm_model: str = "gpt-4o-mini"
     llm_base_url: str | None = None
+    llm_timeout_seconds: float = 60.0
 
     # --- Embedding provider ---
     embedding_provider: str = "openai"

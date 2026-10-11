@@ -56,14 +56,15 @@ app/
 └── main.py            # app factory, middleware, exception handlers
 ```
 
-## Retrieval pipeline (Phase 6 preview)
+## Retrieval pipeline (implemented, Phase 6)
 
 1. **Temporal intent parse** — explicit date/range, "current", "compare", or
-   default → as-of date.
-2. **Eligibility filter (SQL)** — permission + `status='approved'` +
-   `ingestion_status='completed'` + effective interval contains the as-of date.
-   Overlapping approved intervals on one logical document → ambiguity flag, not
-   a silent pick.
+   default → as-of date. Conventions: bare year → July 1, month+year → 15th,
+   ambiguous relatives → default + warning flag.
+2. **Eligibility filter (SQL)** — permission + `status IN (approved, superseded)`
+   + `ingestion_status='completed'` + half-open interval contains the as-of
+   date. Approved beats superseded when both cover the date; overlapping
+   *approved* intervals → ambiguity warning, never a silent pick.
 3. **Semantic rank** — pgvector cosine over eligible chunks only.
 4. **Evidence objects** — chunk + doc title + version + interval + page + score.
 5. **Grounded generation** — model answers only from evidence; backend, not the

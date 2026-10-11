@@ -9,8 +9,8 @@ providers is an env change, not a code change.
 """
 
 import hashlib
-import random
-from typing import Protocol
+import re
+from typing import ClassVar, Protocol
 
 import httpx
 
@@ -63,9 +63,9 @@ class OpenAIEmbeddings:
 
 
 class MockEmbeddings:
-    """Deterministic vectors from content hashes — same text → same vector,
-    similar texts land nowhere near each other (fine for pipeline tests,
-    not for similarity assertions)."""
+    """Deterministic bag-of-words hashing: each token contributes a signed
+    unit component at a hashed index. Similar texts share tokens → similar
+    vectors, so semantic-search behaviour is exercised meaningfully offline."""
 
     def __init__(self, dimensions: int) -> None:
         self._dims = dimensions
@@ -74,14 +74,28 @@ class MockEmbeddings:
     def dimensions(self) -> int:
         return self._dims
 
+    _STOPWORDS: ClassVar[set[str]] = {
+        "the", "is", "a", "an", "of", "to", "in", "on", "for", "and", "or",
+        "are", "was", "were", "what", "which", "how", "many", "much", "per",
+        "be", "been", "do", "does", "did", "it", "its", "at", "by", "with",
+    }
+
     def embed(self, texts: list[str]) -> list[list[float]]:
-        out = []
+        out: list[list[float]] = []
         for t in texts:
-            seed = int.from_bytes(hashlib.sha256(t.encode()).digest()[:8], "big")
-            rng = random.Random(seed)
-            v = [rng.gauss(0, 1) for _ in range(self._dims)]
-            norm = sum(x * x for x in v) ** 0.5 or 1.0
-            out.append([x / norm for x in v])
+            vec = [0.0] * self._dims
+            for token in re.findall(r"[a-z0-9]+", t.lower()):
+                if token in self._STOPWORDS:
+                    continue
+                h = hashlib.sha256(token.encode()).digest()
+                idx = int.from_bytes(h[:4], "big") % self._dims
+                sign = 1.0 if h[4] % 2 == 0 else -1.0
+                vec[idx] += sign
+            norm = sum(x * x for x in vec) ** 0.5
+            if norm == 0:  # no tokens — degenerate text gets a fixed vector
+                vec = [1.0 / self._dims**0.5] * self._dims
+                norm = 1.0
+            out.append([x / norm for x in vec])
         return out
 
 

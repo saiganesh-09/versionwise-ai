@@ -9,6 +9,7 @@ from datetime import date
 os.environ.setdefault("OBJECT_STORAGE_PROVIDER", "local")
 os.environ.setdefault("LOCAL_STORAGE_DIR", tempfile.mkdtemp(prefix="vw-test-storage-"))
 os.environ.setdefault("EMBEDDING_PROVIDER", "mock")
+os.environ.setdefault("LLM_PROVIDER", "mock")
 
 import pytest
 from fastapi.testclient import TestClient

@@ -2,7 +2,7 @@
 
 Updated after each phase. Last updated: 2026-10-10.
 
-## Current phase: 6 — Retrieval engine (up next)
+## Current phase: 7 — Conflict detection + version comparison (up next)
 
 ## Completed
 
@@ -27,6 +27,14 @@ Updated after each phase. Last updated: 2026-10-10.
       reject → archived, supersession via approve (same-document, approved-
       only target), manage-permission enforcement, full audit trail,
       history preserved on supersede.
+- [x] Phase 6 — Temporal retrieval engine: deterministic intent parsing
+      (current/as_of/compare w/ documented midpoint conventions), SQL
+      eligibility (visibility + approved/superseded + interval + ingestion
+      complete + superseded-vs-approved precedence + ambiguity warnings),
+      pgvector top-k, evidence objects, pluggable LLM (openai|mock) with
+      grounded JSON contract, citation validation, /chat + session
+      persistence. Full spec eval corpus (12→15→20 days, boundary dates,
+      future/unapproved exclusion, overlap ambiguity) passes offline.
 
 ## Test results
 
@@ -50,6 +58,7 @@ Updated after each phase. Last updated: 2026-10-10.
 | Backend `pytest` (Phase 4) | ✅ 46/46 total | all parsers, scanned-PDF, dedupe, oversize, idempotent reingest |
 | Live ingest → RustFS | ✅ pass | upload→version→chunks→object stored in bucket |
 | Backend `pytest` (Phase 5) | ✅ 57/57 total | approve/reject/supersede rules, perms, audit, lineage |
+| Backend `pytest` (Phase 6) | ✅ 78/78 total | intent parsing, temporal correctness, boundaries, exclusions, ambiguity, citations, isolation, sessions |
 
 ## Known limitations
 
