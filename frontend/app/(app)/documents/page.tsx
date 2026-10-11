@@ -12,7 +12,23 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  FileWarning,
+  FileCheck2,
+  FolderOpen,
+  Plus,
+} from "lucide-react";
+
+const TYPE_ICON: Record<string, typeof FileText> = {
+  policy: FileCheck2,
+  handbook: BookOpen,
+  guideline: BookOpen,
+  procedure: FileText,
+  report: FileText,
+  contract: FileWarning,
+};
 
 export default function DocumentsPage() {
   const [docs, setDocs] = useState<DocumentItem[] | null>(null);
@@ -131,32 +147,48 @@ export default function DocumentsPage() {
         </div>
       )}
       {docs && filtered.length === 0 && (
-        <p className="mt-8 text-sm text-muted-foreground">
-          No documents match. Create one to start uploading revisions.
-        </p>
+        <div className="mt-8 flex flex-col items-center rounded-xl border border-dashed py-12 text-center">
+          <FolderOpen className="h-8 w-8 text-muted-foreground/50" />
+          <p className="mt-3 text-sm font-medium">No documents match</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Create a document to start uploading versioned revisions.
+          </p>
+        </div>
       )}
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {filtered.map((d) => (
-          <Link key={d.id} href={`/documents/${d.id}`}>
-            <Card className="h-full transition-colors hover:border-primary/50">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{d.title}</CardTitle>
-                  <Badge variant="secondary">{d.document_type}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="line-clamp-2 text-sm text-muted-foreground">
-                  {d.description ?? "No description"}
-                </p>
-                <p className="mt-3 text-[11px] text-muted-foreground">
-                  Updated {new Date(d.updated_at).toLocaleDateString()}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        {filtered.map((d) => {
+          const Icon = TYPE_ICON[d.document_type] ?? FileText;
+          return (
+            <Link key={d.id} href={`/documents/${d.id}`}>
+              <Card className="group h-full transition-all hover:border-primary/40 hover:shadow-md">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <CardTitle className="truncate text-base">
+                        {d.title}
+                      </CardTitle>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      {d.document_type}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="line-clamp-2 text-sm text-muted-foreground">
+                    {d.description ?? "No description"}
+                  </p>
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Updated {new Date(d.updated_at).toLocaleDateString()}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
