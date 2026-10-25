@@ -109,3 +109,7 @@ docker-compose.prod.yml    self-contained prod stack
 - [Project status](docs/PROJECT_STATUS.md) — verification matrix
 - [Evaluation](docs/EVALUATION.md) — corpus + measured metrics
 - [Deployment](docs/DEPLOYMENT.md) — env matrix + prod checklist
+
+## Development Workflow
+
+This project uses Git branches and pull requests to manage changes safely.
