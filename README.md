@@ -113,3 +113,13 @@ docker-compose.prod.yml    self-contained prod stack
 ## Development Workflow
 
 This project uses Git branches and pull requests to manage changes safely.
+
+## Configuration and Security
+
+Follow these practices when configuring or contributing to this project:
+
+- **Protect credentials:** Store API keys, database passwords, and other secrets in environment variables. Never commit real credentials to the repository.
+- **Use example configuration:** Refer to `.env.example` to understand the required environment variable names. Use placeholder values in documentation.
+- **Check `.gitignore`:** Ensure local environment files containing secrets are excluded from Git.
+- **Protect exposed secrets:** If a secret is accidentally committed, revoke or rotate it immediately. Removing it from a later commit does not invalidate the exposed credential.
+- **Review changes:** Check your changes before committing and avoid including credentials, private data, or unnecessary files.
