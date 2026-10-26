@@ -113,3 +113,47 @@ docker-compose.prod.yml    self-contained prod stack
 ## Development Workflow
 
 This project uses Git branches and pull requests to manage changes safely.
+
+## Configuration and Security
+
+Follow these practices when configuring or contributing to this project:
+
+- **Protect credentials:** Store API keys, database passwords, and other secrets in environment variables. Never commit real credentials to the repository.
+- **Use example configuration:** Refer to `.env.example` to understand the required environment variable names. Use placeholder values in documentation.
+- **Check `.gitignore`:** Ensure local environment files containing secrets are excluded from Git.
+- **Protect exposed secrets:** If a secret is accidentally committed, revoke or rotate it immediately. Removing it from a later commit does not invalidate the exposed credential.
+- **Review changes:** Check your changes before committing and avoid including credentials, private data, or unnecessary files.
+
+## Configuration Troubleshooting
+
+Use these checks to diagnose common configuration and startup issues during development.
+
+### Missing Environment Variables
+
+- Compare your local environment configuration with `.env.example`.
+- Confirm that all required variables are defined.
+- Check for spelling mistakes in variable names.
+- Restart the relevant application service after changing environment variables.
+
+### Database Connection Issues
+
+- Verify that the database service is running.
+- Check the configured database host, port, and database name.
+- Confirm that the credentials are valid and the database is accessible.
+- Ensure that the required database migrations have been applied.
+
+### Frontend and Backend Connectivity
+
+- Verify that the backend service is running at the expected address.
+- Confirm that the frontend uses the correct API base URL.
+- Check browser developer tools and backend logs for request failures.
+- Review CORS configuration if cross-origin requests are being blocked.
+
+### Deployment Verification
+
+- Confirm that production environment variables are configured in the deployment platform.
+- Check deployment logs for startup errors.
+- Verify that the deployed frontend can communicate with the backend.
+- Test the relevant health-check and API endpoints after deployment.
+
+**Security reminder:** Never include real credentials, API keys, or other sensitive values when reporting configuration issues.
